@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using TCLIENTS.Data;
 using TCLIENTS.Models;
@@ -90,8 +91,20 @@ namespace TCLIENTS.Controllers
           {
               return Problem("Entity set 'TCLIENTSContext.TCliente'  is null.");
           }
-            _context.TCliente.Add(tCliente);
-            await _context.SaveChangesAsync();
+            object[] paramItems = new object[]
+            {
+                new SqlParameter("@Identificacion", tCliente.CLI_Identificacion),
+                new SqlParameter("@NomPrincipal", tCliente.CLI_NombrePrincipal),
+                new SqlParameter("@NomSecundario", tCliente.CLI_NombreSecundario),
+                new SqlParameter("@ApellidoPaterno", tCliente.CLI_ApellidoPaterno),
+                new SqlParameter("@ApellidoMaterno", tCliente.CLI_ApellidoMaterno),
+                new SqlParameter("@Direccion", tCliente.CLI_Direccion),
+                new SqlParameter("@Telefono", tCliente.CLI_Telefono),
+                new SqlParameter("@Correo", tCliente.CLI_Correo),
+                new SqlParameter("@FechaNacimieto", tCliente.CLI_FechaNacimiento)
+            };
+
+            int respuesta = _context.Database.ExecuteSqlRaw("EXEC [dbo].[SPClienteInsert] @Identificacion,@NomPrincipal,@NomSecundario,@ApellidoPaterno,@ApellidoMaterno,@Direccion,@Telefono,@Correo,@FechaNacimieto ", paramItems);
 
             return CreatedAtAction("GetTCliente", new { id = tCliente.CLI_Id }, tCliente);
         }
